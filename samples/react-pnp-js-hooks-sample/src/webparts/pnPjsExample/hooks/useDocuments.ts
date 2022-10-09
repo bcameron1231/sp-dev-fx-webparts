@@ -1,12 +1,13 @@
 import { Logger, LogLevel } from "@pnp/logging";
-import { spfi, SPFI } from "@pnp/sp";
+import { spfi, SPFI, SPFx } from "@pnp/sp";
 import { useEffect, useState } from "react";
 import { IFile, IResponseItem } from "../components/interfaces";
 import { getSP } from "../pnpjsConfig";
 import { Caching } from "@pnp/queryable";
 import { IItemUpdateResult } from "@pnp/sp/items";
+import { AssignFrom } from "@pnp/core";
 
-const useDocuments = () => {
+const useDocuments = (url: string) => {
   const LOG_SOURCE = "🅿PnPjsExample";
   const LIBRARY_NAME = "Documents";
 
@@ -29,7 +30,9 @@ const useDocuments = () => {
         //this._sp.using(Caching("session"));
 
         //Creating a new sp object to include caching behavior. This way our original object is unchanged.
-        const spCache = spfi(_sp).using(Caching({ store: "session" }));
+        const spCache = spfi(url)
+          .using(AssignFrom(_sp.web))
+          .using(Caching({ store: "session" }));
 
         const response: IResponseItem[] = await spCache.web.lists
           .getByTitle(LIBRARY_NAME)
@@ -67,7 +70,9 @@ const useDocuments = () => {
 
   const updateDocuments = async () => {
     try {
-      const [batchedSP, execute] = _sp.batched();
+      const [batchedSP, execute] = spfi(url)
+        .using(AssignFrom(_sp.web))
+        .batched();
 
       //clone documents
       const items = JSON.parse(JSON.stringify(documents));
@@ -79,7 +84,7 @@ const useDocuments = () => {
         batchedSP.web.lists
           .getByTitle(LIBRARY_NAME)
           .items.getById(items[i].Id)
-          .update({ Title: `${items[i].Name}-Updated` })
+          .update({ Title: `${items[i].Name}-UpdatedTest` })
           .then((r) => res.push(r));
       }
       // Executes the batched calls

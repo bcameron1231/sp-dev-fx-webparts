@@ -12,7 +12,8 @@ export interface IAsyncAwaitPnPJsProps {
 
 export const PnPjsExample: React.FC<IPnPjsExampleProps> = (props) => {
   //use custom hook for CRUD operations with documents
-  const [documents, updateDocuments, totalSize, isError] = useDocuments();
+  const url = window.location.origin + "/sites/ContosoGroup8";
+  const [documents, updateDocuments, totalSize, isError] = useDocuments(url);
 
   if (!isError) {
     return (
